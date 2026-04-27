@@ -1,0 +1,87 @@
+.chart-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+.chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.chart-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.chart-controls {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-secondary);
+  padding: 3px;
+  border-radius: var(--radius-md);
+}
+
+.chart-range-btn {
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chart-range-btn:hover {
+  color: var(--text-secondary);
+}
+
+.chart-range-btn.active {
+  color: var(--cyan-400);
+  background: rgba(6, 182, 212, 0.12);
+}
+
+.chart-body {
+  height: 300px;
+  position: relative;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+}
+
+.chart-empty p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.chart-empty span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 480px) {
+  .chart-body {
+    height: 220px;
+  }
+}

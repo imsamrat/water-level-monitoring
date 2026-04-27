@@ -1,0 +1,143 @@
+.reading-history {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+.reading-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.reading-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.reading-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.reading-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.reading-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.reading-time-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reading-date {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.reading-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.reading-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.reading-percentage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.percentage-bar-bg {
+  width: 80px;
+  height: 6px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.percentage-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.percentage-bar-low {
+  background: var(--red-400);
+}
+
+.percentage-bar-medium {
+  background: var(--yellow-400);
+}
+
+.percentage-bar-high {
+  background: var(--blue-400);
+}
+
+.percentage-bar-full {
+  background: var(--green-400);
+}
+
+.percentage-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cyan-400);
+  min-width: 40px;
+}
+
+.motor-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.motor-badge-on {
+  color: var(--green-400);
+  background: var(--green-bg);
+}
+
+.motor-badge-off {
+  color: var(--text-muted);
+  background: rgba(100, 116, 139, 0.1);
+}
+
+.reading-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 8px;
+}
+
+.reading-empty p {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.reading-empty span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
