@@ -73,13 +73,24 @@ const Dashboard = () => {
       }));
     });
 
+    // FALLBACK POLLING: 
+    // Since Vercel Serverless doesn't support long-lived WebSockets perfectly,
+    // we fetch data every 5 seconds as a backup.
+    const fallbackInterval = setInterval(() => {
+      if (!connected) {
+        fetchData();
+        setRefreshKey((prev) => prev + 1);
+      }
+    }, 5000);
+
     return () => {
       socket.off("waterUpdate");
       socket.off("connect");
       socket.off("disconnect");
       socket.disconnect();
+      clearInterval(fallbackInterval);
     };
-  }, [fetchData]);
+  }, [fetchData, connected]);
 
   const handleRefresh = () => {
     setLoading(true);

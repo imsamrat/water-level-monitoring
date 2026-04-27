@@ -16,18 +16,6 @@ let currentPercentage = 10; // Start at 10%
 let direction = 1; // 1 = filling, -1 = draining
 
 const sendData = () => {
-  // Simulate water level changes
-  currentPercentage += direction * (Math.random() * 5 + 2);
-
-  // Bounce between 5% and 98%
-  if (currentPercentage >= 98) {
-    currentPercentage = 98;
-    direction = -1;
-  } else if (currentPercentage <= 5) {
-    currentPercentage = 5;
-    direction = 1;
-  }
-
   const percentage = Math.round(currentPercentage);
   const level = Math.round(1023 - (percentage / 100) * 1023); // Simulate analog reading
 
@@ -55,22 +43,39 @@ const sendData = () => {
     let body = "";
     res.on("data", (chunk) => (body += chunk));
     res.on("end", () => {
-      let status = "FULL";
-      if (percentage <= 25) status = "LOW";
-      else if (percentage <= 50) status = "MEDIUM";
-      else if (percentage <= 75) status = "HIGH";
+      try {
+        const response = JSON.parse(body);
+        const motorStatus = response.motorStatus || "OFF";
+        
+        // SMART LOGIC:
+        // If Motor is ON -> Direction is UP (Filling)
+        // If Motor is OFF -> Direction is DOWN (Draining/Usage)
+        if (motorStatus === "ON") {
+          direction = 1;
+          currentPercentage += (Math.random() * 3 + 1); // Filling speed
+        } else {
+          direction = -1;
+          currentPercentage -= (Math.random() * 0.5 + 0.1); // Slow usage/drain
+        }
 
-      const statusColors = {
-        LOW: "\x1b[31m",
-        MEDIUM: "\x1b[33m",
-        HIGH: "\x1b[34m",
-        FULL: "\x1b[32m",
-      };
+        // Clamp values
+        if (currentPercentage >= 100) currentPercentage = 100;
+        if (currentPercentage <= 0) currentPercentage = 0;
 
-      const dir = direction === 1 ? "▲ Filling" : "▼ Draining";
-      console.log(
-        `${statusColors[status]}● ${status}\x1b[0m | Level: ${percentage}% | Raw: ${level} | ${dir} | ${new Date().toLocaleTimeString()}`
-      );
+        const status = percentage <= 20 ? "LOW" : (percentage >= 95 ? "FULL" : "NORMAL");
+        const statusColors = {
+          LOW: "\x1b[31m",
+          NORMAL: "\x1b[34m",
+          FULL: "\x1b[32m",
+        };
+
+        const motorColor = motorStatus === "ON" ? "\x1b[32m" : "\x1b[31m";
+        console.log(
+          `${statusColors[status] || ""}[${status}]\x1b[0m | Level: ${percentage}% | Motor: ${motorColor}${motorStatus}\x1b[0m | ${direction === 1 ? "▲ Filling" : "▼ Using"} | ${new Date().toLocaleTimeString()}`
+        );
+      } catch (e) {
+        console.log("Response received (could not parse JSON)");
+      }
     });
   });
 
