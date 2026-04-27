@@ -12,10 +12,15 @@ const waterDataRoutes = require("./routes/waterData");
 const app = express();
 const server = http.createServer(app);
 
+// CORS origins (supports comma-separated CLIENT_URL for multiple origins)
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((url) => url.trim());
+
 // Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
@@ -26,7 +31,7 @@ app.set("io", io);
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
