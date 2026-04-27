@@ -22,7 +22,7 @@ const Navbar = () => {
 
   const navLinks = [
     { path: "/dashboard", label: "Dashboard", icon: <IoGridOutline /> },
-    { path: "/analytics", label: "Analytics", icon: <IoBarChartOutline /> },
+    // { path: "/analytics", label: "Analytics", icon: <IoBarChartOutline /> }, // Hidden - Analytics tab
     { path: "/events", label: "Events", icon: <IoTimeOutline /> },
   ];
 

@@ -49,6 +49,11 @@ export const waterAPI = {
   getChartData: (hours = 24) => api.get(`/water-data/chart?hours=${hours}`),
   getEvents: (limit = 50) => api.get(`/water-data/events?limit=${limit}`),
   getStats: () => api.get("/water-data/stats"),
+  getMotorStatus: () => api.get("/water-data/motor-status"),
+  controlMotor: (action, mode = "manual") =>
+    api.post("/water-data/motor-control", { action, mode }),
+  controlLed: (status) =>
+    api.post("/water-data/led-control", { status }),
 };
 
 export default api;

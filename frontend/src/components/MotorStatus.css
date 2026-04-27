@@ -1,0 +1,562 @@
+/* ===== Motor Status Panel ===== */
+.motor-status-panel {
+  margin-top: 24px;
+  padding: 28px;
+  border-radius: 16px;
+}
+
+.motor-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.motor-panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.motor-panel-title svg {
+  font-size: 22px;
+  color: var(--cyan-400);
+}
+
+.motor-spin {
+  animation: motorGearSpin 2s linear infinite !important;
+}
+
+@keyframes motorGearSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.motor-panel-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Mode Badge */
+.motor-mode-badge {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+
+.mode-auto {
+  color: var(--cyan-400);
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.mode-manual {
+  color: var(--yellow-400);
+  background: rgba(234, 179, 8, 0.1);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+/* Main Motor Display */
+.motor-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  transition: all 0.5s ease;
+  gap: 20px;
+}
+
+.motor-active {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(6, 182, 212, 0.06) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.08);
+}
+
+.motor-inactive {
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.06) 0%, rgba(71, 85, 105, 0.04) 100%);
+  border: 1px solid rgba(100, 116, 139, 0.15);
+}
+
+.motor-visual {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Motor Circle */
+.motor-circle {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.5s ease;
+}
+
+.motor-circle.on {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(6, 182, 212, 0.15));
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.25), inset 0 0 15px rgba(34, 197, 94, 0.1);
+}
+
+.motor-circle.off {
+  background: rgba(100, 116, 139, 0.1);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.motor-gear-icon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.motor-circle.on .motor-gear-icon {
+  color: var(--green-400);
+}
+
+.motor-circle.off .motor-gear-icon {
+  color: var(--text-muted);
+}
+
+.motor-gear-icon.spinning {
+  animation: motorGearSpin 1.5s linear infinite;
+}
+
+.motor-ring {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all 0.5s ease;
+}
+
+.motor-ring.ring-active {
+  border-color: rgba(34, 197, 94, 0.3);
+  animation: ringPulse 2s ease-in-out infinite;
+}
+
+.motor-ring-2 {
+  top: -8px !important;
+  left: -8px !important;
+  right: -8px !important;
+  bottom: -8px !important;
+}
+
+.motor-ring-2.ring-active {
+  border-color: rgba(34, 197, 94, 0.15) !important;
+  animation: ringPulse 2s ease-in-out infinite 0.5s !important;
+}
+
+@keyframes ringPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+/* Motor Status Text */
+.motor-status-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.motor-state-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.state-on {
+  color: var(--green-400);
+}
+
+.state-off {
+  color: var(--text-muted);
+}
+
+.flash-icon {
+  animation: flashPulse 1s ease-in-out infinite;
+}
+
+@keyframes flashPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.motor-reason {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 220px;
+}
+
+/* Toggle Button */
+.motor-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.motor-toggle-btn svg {
+  font-size: 20px;
+}
+
+.toggle-on {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+
+.toggle-on:hover {
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+  transform: translateY(-1px);
+}
+
+.toggle-off {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.toggle-off:hover {
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45);
+  transform: translateY(-1px);
+}
+
+.motor-toggle-btn.toggling {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.toggle-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Control Mode Buttons */
+.motor-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 22, 41, 0.4);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.mode-btn svg {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+.mode-btn span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mode-btn small {
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.mode-btn:hover:not(:disabled) {
+  border-color: rgba(6, 182, 212, 0.3);
+  background: rgba(6, 182, 212, 0.05);
+}
+
+.mode-btn.active {
+  border-color: rgba(6, 182, 212, 0.4);
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--cyan-400);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.08);
+}
+
+.mode-btn.active small {
+  color: var(--cyan-400);
+  opacity: 0.7;
+}
+
+.mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clickable:hover {
+  border-color: var(--yellow-400);
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.led-active {
+  border-color: rgba(250, 204, 21, 0.4) !important;
+  background: rgba(250, 204, 21, 0.1) !important;
+  box-shadow: 0 0 15px rgba(250, 204, 21, 0.1);
+}
+
+.led-icon {
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+
+.led-active .led-icon {
+  color: var(--yellow-400);
+}
+
+.glow-anim {
+  animation: ledGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes ledGlow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.4)); }
+  50% { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.8)); }
+}
+
+/* Motor Info Cards */
+.motor-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.motor-info-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(15, 22, 41, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+}
+
+.info-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.water-icon {
+  color: var(--blue-400);
+}
+
+.time-icon {
+  color: var(--yellow-400);
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.info-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Motor History */
+.motor-history {
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  padding-top: 16px;
+}
+
+.motor-history-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.motor-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.motor-history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  font-size: 13px;
+}
+
+.motor-history-item:hover {
+  background: rgba(148, 163, 184, 0.04);
+}
+
+.history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-on {
+  background: var(--green-400);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.dot-off {
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+
+.history-time {
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  min-width: 80px;
+}
+
+.history-level {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 40px;
+}
+
+.history-status {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.history-status.on {
+  color: var(--green-400);
+  background: var(--green-bg);
+}
+
+.history-status.off {
+  color: var(--text-muted);
+  background: rgba(100, 116, 139, 0.1);
+}
+
+.motor-history-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.motor-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .motor-status-panel {
+    padding: 20px;
+  }
+
+  .motor-display {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .motor-visual {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .motor-status-text {
+    align-items: center;
+  }
+
+  .motor-reason {
+    text-align: center;
+  }
+
+  .motor-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .motor-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .motor-panel-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

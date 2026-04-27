@@ -5,7 +5,8 @@ import WaterTank from "../components/WaterTank";
 import StatsCards from "../components/StatsCards";
 import WaterChart from "../components/WaterChart";
 import AlertBanner from "../components/AlertBanner";
-import ReadingHistory from "../components/ReadingHistory";
+// import ReadingHistory from "../components/ReadingHistory"; // Hidden - replaced by MotorStatus
+import MotorStatus from "../components/MotorStatus";
 import Navbar from "../components/Navbar";
 import { IoRefreshOutline, IoPulseOutline } from "react-icons/io5";
 import "./Dashboard.css";
@@ -158,8 +159,8 @@ const Dashboard = () => {
             <WaterChart latestData={waterData} />
           </div>
 
-          {/* Reading History */}
-          <ReadingHistory refreshTrigger={refreshKey} />
+          {/* Motor Status Panel (replaced Recent Readings) */}
+          <MotorStatus waterData={waterData} refreshTrigger={refreshKey} />
         </div>
       </div>
     </>

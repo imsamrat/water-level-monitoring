@@ -1,38 +1,6 @@
-/*
- * ESP8266 Water Level Sensor - Arduino Code
- * Using HC-SR04 Ultrasonic Sensor
- * 
- * Hardware Setup:
- * - ESP8266 (NodeMCU or Wemos D1 Mini)
- * - HC-SR04 Ultrasonic Sensor
- * 
- * Wiring (with voltage divider on ECHO):
- * - HC-SR04 VCC  → ESP8266 VIN (5V)
- * - HC-SR04 GND  → ESP8266 GND
- * - HC-SR04 TRIG → ESP8266 D1 (GPIO5)
- * - HC-SR04 ECHO → Voltage Divider → ESP8266 D2 (GPIO4)
- * 
- * Voltage Divider for ECHO pin (5V → 3.3V):
- *   ECHO ──[1kΩ]──┬──→ D2 (GPIO4)
- *                  │
- *                [2kΩ]
- *                  │
- *                 GND
- * 
- * Mounting:
- * - Mount sensor at the TOP of the tank, facing DOWN
- * - Sensor measures distance to water surface
- * - Water Level = TANK_HEIGHT - distance
- * 
- * Configuration:
- * - Update WiFi credentials
- * - Update server IP address
- * - Update TANK_HEIGHT_CM to match your tank
- * - API key must match backend .env
- */
-
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h> // You need to install this library via Library Manager!
 
 // ===== CONFIGURATION =====
 const char* ssid = "YOUR_WIFI_SSID";
@@ -44,24 +12,31 @@ const char* apiKey = "esp8266_water_sensor_key_2024";
 #define TRIG_PIN D1   // GPIO5
 #define ECHO_PIN D2   // GPIO4
 
+// ===== OUTPUT PINS =====
+#define MOTOR_PIN D5  // Relay for Motor
+#define LED_PIN D6    // External LED Light (or use LED_BUILTIN)
+
 // ===== TANK CONFIGURATION =====
-// Measure your tank height in cm and update this value
-#define TANK_HEIGHT_CM 30       // Total tank height in cm (change this!)
-#define SENSOR_OFFSET_CM 2      // Distance from sensor to max water level (cm)
-#define MIN_DISTANCE_CM 2       // HC-SR04 minimum reliable distance
-#define MAX_DISTANCE_CM 400     // HC-SR04 maximum range
+#define TANK_HEIGHT_CM 30       
+#define SENSOR_OFFSET_CM 2      
+#define MIN_DISTANCE_CM 2       
+#define MAX_DISTANCE_CM 400     
 
 // ===== TIMING =====
-const unsigned long SEND_INTERVAL = 5000;  // Send data every 5 seconds
+const unsigned long SEND_INTERVAL = 5000;  
 unsigned long lastSendTime = 0;
 
 // ===== SMOOTHING =====
-// Take multiple readings and average them for stability
 #define NUM_READINGS 5
 #define READING_DELAY_MS 50
 
 // WiFi client
 WiFiClient wifiClient;
+
+// ===== BLINKING CONFIG =====
+bool currentMotorOn = false;
+unsigned long lastBlinkTime = 0;
+const int blinkInterval = 500; // 500ms blink rate
 
 void setup() {
   Serial.begin(115200);
@@ -72,100 +47,60 @@ void setup() {
   pinMode(ECHO_PIN, INPUT);
   digitalWrite(TRIG_PIN, LOW);
 
-  Serial.println();
-  Serial.println("╔═══════════════════════════════════════════╗");
-  Serial.println("║   💧 Water Level Monitoring System        ║");
-  Serial.println("║   ESP8266 + HC-SR04 Ultrasonic Sensor     ║");
-  Serial.println("╚═══════════════════════════════════════════╝");
-  Serial.println();
-  Serial.print("Tank Height: ");
-  Serial.print(TANK_HEIGHT_CM);
-  Serial.println(" cm");
-  Serial.println();
+  // Configure output pins
+  pinMode(MOTOR_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(MOTOR_PIN, LOW); 
+  digitalWrite(LED_PIN, LOW);   
 
-  // Connect to WiFi
-  Serial.print("Connecting to WiFi: ");
-  Serial.println(ssid);
+  Serial.println("\n💧 Water Level System - Motor Indicator Mode");
 
   WiFi.begin(ssid, password);
-
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 30) {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
-    attempts++;
   }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
-    Serial.println("✅ WiFi Connected!");
-    Serial.print("📡 IP Address: ");
-    Serial.println(WiFi.localIP());
-    Serial.println();
-  } else {
-    Serial.println();
-    Serial.println("❌ WiFi Connection Failed!");
-    Serial.println("Restarting in 5 seconds...");
-    delay(5000);
-    ESP.restart();
-  }
+  Serial.println("\n✅ WiFi Connected!");
 }
 
 void loop() {
   unsigned long currentTime = millis();
 
+  // Handle LED Blinking if motor is ON
+  if (currentMotorOn) {
+    if (currentTime - lastBlinkTime >= blinkInterval) {
+      lastBlinkTime = currentTime;
+      digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // Toggle LED
+    }
+  } else {
+    digitalWrite(LED_PIN, LOW); // Ensure LED is OFF if motor is OFF
+  }
+
+  // Send data at intervals
   if (currentTime - lastSendTime >= SEND_INTERVAL) {
     lastSendTime = currentTime;
-
     if (WiFi.status() == WL_CONNECTED) {
       sendWaterData();
-    } else {
-      Serial.println("⚠️ WiFi disconnected! Reconnecting...");
-      WiFi.reconnect();
     }
   }
 }
 
-/**
- * Measure distance using HC-SR04 ultrasonic sensor
- * Returns distance in cm, or -1 if reading failed
- */
 float measureDistance() {
-  // Send ultrasonic pulse
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-
-  // Measure echo time (timeout after 30ms = ~500cm)
   long duration = pulseIn(ECHO_PIN, HIGH, 30000);
-
-  // If no echo received
-  if (duration == 0) {
-    return -1;
-  }
-
-  // Calculate distance: speed of sound = 343 m/s = 0.034 cm/µs
-  // Distance = (time × speed) / 2  (round trip)
+  if (duration == 0) return -1;
   float distance = (duration * 0.034) / 2.0;
-
-  // Validate range
-  if (distance < MIN_DISTANCE_CM || distance > MAX_DISTANCE_CM) {
-    return -1;
-  }
-
+  if (distance < MIN_DISTANCE_CM || distance > MAX_DISTANCE_CM) return -1;
   return distance;
 }
 
-/**
- * Get smoothed distance reading (average of multiple samples)
- * Filters out failed readings for reliability
- */
 float getSmoothedDistance() {
   float total = 0;
   int validReadings = 0;
-
   for (int i = 0; i < NUM_READINGS; i++) {
     float d = measureDistance();
     if (d > 0) {
@@ -174,59 +109,24 @@ float getSmoothedDistance() {
     }
     delay(READING_DELAY_MS);
   }
-
-  if (validReadings == 0) {
-    return -1;  // All readings failed
-  }
-
-  return total / validReadings;
+  return (validReadings == 0) ? -1 : (total / validReadings);
 }
 
-/**
- * Read sensor, calculate water level percentage, and send to backend
- */
 void sendWaterData() {
-  // Get averaged distance reading
   float distance = getSmoothedDistance();
+  if (distance < 0) return;
 
-  if (distance < 0) {
-    Serial.println("❌ Sensor read failed — skipping this cycle");
-    return;
-  }
-
-  // Calculate water level
-  // Sensor is mounted at the top, looking down
-  // When tank is FULL:  distance ≈ SENSOR_OFFSET_CM (small)
-  // When tank is EMPTY: distance ≈ TANK_HEIGHT_CM + SENSOR_OFFSET_CM (large)
   float effectiveDistance = distance - SENSOR_OFFSET_CM;
   float waterLevelCm = TANK_HEIGHT_CM - effectiveDistance;
-
-  // Clamp water level to valid range
   if (waterLevelCm < 0) waterLevelCm = 0;
   if (waterLevelCm > TANK_HEIGHT_CM) waterLevelCm = TANK_HEIGHT_CM;
 
-  // Calculate percentage
   int percentage = (int)((waterLevelCm / TANK_HEIGHT_CM) * 100.0);
   percentage = constrain(percentage, 0, 100);
-
-  // Raw level value (water height in mm for precision)
   int rawLevel = (int)(waterLevelCm * 10);
 
-  // Print to Serial Monitor
-  Serial.print("📏 Distance: ");
-  Serial.print(distance, 1);
-  Serial.print(" cm | 💧 Water: ");
-  Serial.print(waterLevelCm, 1);
-  Serial.print(" cm | ");
-  Serial.print(percentage);
-  Serial.print("% | ");
+  String jsonPayload = "{\"level\":" + String(rawLevel) + ",\"percentage\":" + String(percentage) + ",\"deviceId\":\"tank_01\"}";
 
-  // Create JSON payload
-  String jsonPayload = "{\"level\":" + String(rawLevel) +
-                        ",\"percentage\":" + String(percentage) +
-                        ",\"deviceId\":\"tank_01\"}";
-
-  // Send HTTP POST request
   HTTPClient http;
   http.begin(wifiClient, serverUrl);
   http.addHeader("Content-Type", "application/json");
@@ -234,13 +134,25 @@ void sendWaterData() {
 
   int httpResponseCode = http.POST(jsonPayload);
 
-  if (httpResponseCode > 0) {
-    Serial.print("✅ Status: ");
-    Serial.println(httpResponseCode);
-  } else {
-    Serial.print("❌ Error: ");
-    Serial.println(http.errorToString(httpResponseCode));
-  }
+  if (httpResponseCode == 200) {
+    String responseBody = http.getString();
+    StaticJsonDocument<256> doc;
+    deserializeJson(doc, responseBody);
 
+    const char* motorStatus = doc["motorStatus"];
+    
+    // Update local motor state for blinking
+    if (String(motorStatus) == "ON") {
+      currentMotorOn = true;
+      digitalWrite(MOTOR_PIN, HIGH);
+    } else {
+      currentMotorOn = false;
+      digitalWrite(MOTOR_PIN, LOW);
+    }
+
+    Serial.print("📡 Motor Status: "); Serial.println(motorStatus);
+  } else {
+    Serial.print("❌ HTTP Error: "); Serial.println(httpResponseCode);
+  }
   http.end();
 }
